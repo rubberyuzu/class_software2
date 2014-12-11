@@ -7,7 +7,7 @@ int main()
 {
   char buf[BUFSIZE];
   FILE *fp;
-  const char *filename = "cells.txt";
+  const char *filename = "readable.txt";
   
   if ((fp = fopen(filename, "r")) == NULL) {
     printf("error: can't open %s\n", filename);

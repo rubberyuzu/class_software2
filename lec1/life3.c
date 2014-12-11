@@ -13,31 +13,36 @@ void init_cells()
 
   for (i = 0; i < HEIGHT; i++) {
     for (j = 0; j < WIDTH; j++) {
-      cell[i][j] = rand() % 2;
+      cell[i][j] = rand() % 3;
     }
   }
 }
 
-void print_cells_and_count(FILE *fp)
+void print_cells(FILE *fp)
 {
   int i, j;
 
   fprintf(fp, "----------\n");
 
   for (i = 0; i < HEIGHT; i++) {
-    int line_count = 0;
     for (j = 0; j < WIDTH; j++) {
-      char c = (cell[i][j] == 1) ? '#' : ' ';
+      char c;
+      if(cell[i][j]==2){
+        c = 'i';
+      }else if(cell[i][j]==1){
+        c = '#';
+      }else{
+        c = ' ';
+      }
       fputc(c, fp);
-      if (c=='#') line_count++; 
     }
-    fprintf(fp, "%d", line_count);
     fputc('\n', fp);
   }
   fflush(fp);
 
   sleep(1);
 }
+
 
 int count_adjacent_cells(int i, int j)
 {
@@ -63,15 +68,26 @@ void update_cells()
     for (j = 0; j < WIDTH; j++) {
       int n = count_adjacent_cells(i, j);
       if (cell[i][j] == 0) {
-      	if (n == 3)  
+      	if (n >= 5)  
+      	  cell_next[i][j] = 2;
+      	else if(n>=3)        
       	  cell_next[i][j] = 1;
-      	else         
-      	  cell_next[i][j] = 0;
-      } else {
-      	if (n == 2 || n == 3)  
+        else
+          cell_next[i][j] = 0;
+      } else if (cell[i][j] == 1){
+      	if (n >= 4)  
+      	  cell_next[i][j] = 2;
+      	else if(n >= 2)	  
       	  cell_next[i][j] = 1;
-      	else 	  
-      	  cell_next[i][j] = 0;
+        else
+          cell_next[i][j] = 0;
+      }else{
+        if (n >= 6)  
+          cell_next[i][j] = 2;
+        else if(n >= 4)   
+          cell_next[i][j] = 1;
+        else
+          cell_next[i][j] = 0;
       }
     }
   }
@@ -97,12 +113,12 @@ int main()
   }
 
   init_cells();
-  print_cells_and_count(fp);
+  print_cells(fp);
 
   while (1) {
     printf("generation = %d\n", gen++);
     update_cells();
-    print_cells_and_count(fp);
+    print_cells(fp);
   }
 
   fclose(fp);

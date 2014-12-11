@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <stdlib.h>
+#include <string.h>
 
 #define HEIGHT 50
 #define WIDTH 70
@@ -9,29 +10,42 @@ int cell[HEIGHT][WIDTH];
 
 void init_cells()
 {
-  int i, j;
+  char line[WIDTH];
+  FILE *fp;
+  const char *filename = "readable.txt";
 
-  for (i = 0; i < HEIGHT; i++) {
-    for (j = 0; j < WIDTH; j++) {
-      cell[i][j] = rand() % 2;
-    }
+  if((fp = fopen(filename, "r"))==NULL){
+    printf("error: cant't open %s\n", filename);
   }
+
+  int i = 0;
+  int j;
+  while ((fgets(line, sizeof(line), fp)!= NULL)&&i<HEIGHT){
+    for (j = 0; j < WIDTH; ++j){
+      if(line[j]=='#'){
+        cell[i][j] = 1;
+      }else{
+        cell[i][j] = 0;
+      }
+    }
+    i++;
+  }
+
+  fclose(fp);
+
 }
 
-void print_cells_and_count(FILE *fp)
+void print_cells(FILE *fp)
 {
   int i, j;
 
   fprintf(fp, "----------\n");
 
   for (i = 0; i < HEIGHT; i++) {
-    int line_count = 0;
     for (j = 0; j < WIDTH; j++) {
       char c = (cell[i][j] == 1) ? '#' : ' ';
       fputc(c, fp);
-      if (c=='#') line_count++; 
     }
-    fprintf(fp, "%d", line_count);
     fputc('\n', fp);
   }
   fflush(fp);
@@ -63,15 +77,15 @@ void update_cells()
     for (j = 0; j < WIDTH; j++) {
       int n = count_adjacent_cells(i, j);
       if (cell[i][j] == 0) {
-      	if (n == 3)  
-      	  cell_next[i][j] = 1;
-      	else         
-      	  cell_next[i][j] = 0;
+  if (n == 3)  
+    cell_next[i][j] = 1;
+  else         
+    cell_next[i][j] = 0;
       } else {
-      	if (n == 2 || n == 3)  
-      	  cell_next[i][j] = 1;
-      	else 	  
-      	  cell_next[i][j] = 0;
+  if (n == 2 || n == 3)  
+    cell_next[i][j] = 1;
+  else    
+    cell_next[i][j] = 0;
       }
     }
   }
@@ -82,7 +96,6 @@ void update_cells()
     }
   }
 }
-
 
 
 int main()
@@ -97,12 +110,12 @@ int main()
   }
 
   init_cells();
-  print_cells_and_count(fp);
+  print_cells(fp);
 
   while (1) {
     printf("generation = %d\n", gen++);
     update_cells();
-    print_cells_and_count(fp);
+    print_cells(fp);
   }
 
   fclose(fp);
